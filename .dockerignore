@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+.DS_Store
+uploads
+generated
+generated/prisma/libquery_engine-*.node
+generated/prisma/*.log
+npm-debug.log*
+pnpm-debug.log*
