@@ -57,12 +57,12 @@ export default function HomePage() {
 
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [title, setTitle] = useState("새 녹음");
+  const [title, setTitle] = useState("새 립메모");
   const [elapsedSec, setElapsedSec] = useState(0);
   const [recorderState, setRecorderState] = useState<
     "idle" | "recording" | "paused" | "uploading"
   >("idle");
-  const [message, setMessage] = useState("녹음 버튼을 눌러 시작하세요.");
+  const [message, setMessage] = useState("립메모 버튼을 눌러 시작하세요.");
   const [recordingError, setRecordingError] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState("");
   const [draftTranscript, setDraftTranscript] = useState("");
@@ -104,7 +104,7 @@ export default function HomePage() {
       const response = await fetch("/api/recordings");
 
       if (!response.ok) {
-        setMessage("녹음 목록을 불러오지 못했습니다. DB 연결을 확인하세요.");
+        setMessage("립메모 목록을 불러오지 못했습니다. DB 연결을 확인하세요.");
         return;
       }
 
@@ -113,7 +113,7 @@ export default function HomePage() {
       setRecordings(data.recordings);
       setSelectedId((current) => current ?? data.recordings[0]?.id ?? null);
     } catch {
-      setMessage("녹음 목록을 불러오지 못했습니다. DB 연결을 확인하세요.");
+      setMessage("립메모 목록을 불러오지 못했습니다. DB 연결을 확인하세요.");
     }
   }
 
@@ -150,7 +150,7 @@ export default function HomePage() {
     setRecordingError(null);
 
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-      setMessage("이 브라우저는 음성 녹음을 지원하지 않습니다.");
+      setMessage("이 브라우저는 음성 립메모를 지원하지 않습니다.");
       return;
     }
 
@@ -179,13 +179,13 @@ export default function HomePage() {
       };
 
       setElapsedSec(0);
-      setMessage("녹음 중입니다.");
+      setMessage("립메모 기록 중입니다.");
       setRecorderState("recording");
       recorder.start();
       startTimer();
     } catch {
       setRecordingError("마이크 권한을 허용한 뒤 다시 시도하세요.");
-      setMessage("녹음을 시작하지 못했습니다.");
+      setMessage("립메모를 시작하지 못했습니다.");
       setRecorderState("idle");
     }
   }
@@ -194,20 +194,20 @@ export default function HomePage() {
     mediaRecorderRef.current?.pause();
     stopTimer();
     setRecorderState("paused");
-    setMessage("녹음이 일시정지되었습니다.");
+    setMessage("립메모가 일시정지되었습니다.");
   }
 
   function resumeRecording() {
     mediaRecorderRef.current?.resume();
     startTimer();
     setRecorderState("recording");
-    setMessage("녹음 중입니다.");
+    setMessage("립메모 기록 중입니다.");
   }
 
   function stopRecording() {
     if (!mediaRecorderRef.current) return;
 
-    setMessage("녹음을 저장하고 있습니다.");
+    setMessage("립메모를 저장하고 있습니다.");
     setRecorderState("uploading");
     mediaRecorderRef.current.stop();
   }
@@ -218,7 +218,7 @@ export default function HomePage() {
     const durationSec = Math.max(1, elapsedSec);
     const formData = new FormData();
 
-    formData.append("title", title.trim() ? title.trim() : "새 녹음");
+    formData.append("title", title.trim() ? title.trim() : "새 립메모");
     formData.append("durationSec", String(durationSec));
     formData.append("audio", audioBlob, "recording.webm");
 
@@ -233,16 +233,16 @@ export default function HomePage() {
       };
 
       if (!uploadResponse.ok || !uploadData.recording) {
-        throw new Error(uploadData.message ?? "녹음 저장에 실패했습니다.");
+        throw new Error(uploadData.message ?? "립메모 저장에 실패했습니다.");
       }
 
       updateRecording(uploadData.recording);
-      setMessage("녹음 저장 완료. 전사를 시작합니다.");
+      setMessage("립메모 저장 완료. 전사를 시작합니다.");
       await transcribeRecording(uploadData.recording.id);
-      setTitle("새 녹음");
+      setTitle("새 립메모");
     } catch (error) {
       const nextMessage =
-        error instanceof Error ? error.message : "녹음 처리에 실패했습니다.";
+        error instanceof Error ? error.message : "립메모 처리에 실패했습니다.";
       setMessage(nextMessage);
       setRecordingError(nextMessage);
     } finally {
@@ -318,7 +318,7 @@ export default function HomePage() {
       current.filter((recording) => recording.id !== selectedRecording.id),
     );
     setSelectedId(null);
-    setMessage("녹음 기록을 삭제했습니다.");
+    setMessage("립메모 기록을 삭제했습니다.");
     void loadRecordings();
   }
 
@@ -326,12 +326,12 @@ export default function HomePage() {
     <main className="min-h-screen bg-[#f6f7f9] text-[#15181d]">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 py-6 lg:px-8">
         <header className="flex flex-col gap-2 border-b border-[#d7dbe2] pb-5">
-          <p className="text-sm font-semibold text-[#006d77]">Groq 음성 전사</p>
+          <p className="text-sm font-semibold text-[#006d77]">립메모 Groq 전사</p>
           <h1 className="text-3xl font-semibold tracking-normal">
-            음성녹음 전사 및 다운로드
+            립메모 전사 및 다운로드
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-[#59616f]">
-            녹음한 음성을 Groq로 텍스트 변환하고 TXT 또는 Excel 파일로
+            기록한 음성을 Groq로 텍스트 변환하고 TXT 또는 Excel 파일로
             내려받습니다.
           </p>
         </header>
@@ -341,7 +341,7 @@ export default function HomePage() {
             <div className="rounded-lg border border-[#d7dbe2] bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-base font-semibold">새 녹음</h2>
+                  <h2 className="text-base font-semibold">새 립메모</h2>
                   <p className="mt-1 text-sm text-[#6c7480]">{message}</p>
                 </div>
                 <div className="rounded-md bg-[#e9f7f6] px-3 py-2 text-xl font-semibold text-[#006d77] tabular-nums">
@@ -379,7 +379,7 @@ export default function HomePage() {
                   disabled={!canRecord}
                   className="rounded-md bg-[#006d77] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#005e67] disabled:cursor-not-allowed disabled:bg-[#aab3bf]"
                 >
-                  녹음 시작
+                  립메모 시작
                 </button>
                 {isRecording ? (
                   <button
@@ -405,19 +405,19 @@ export default function HomePage() {
                   disabled={!isRecording && !isPaused}
                   className="col-span-2 rounded-md bg-[#c2410c] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#9a3412] disabled:cursor-not-allowed disabled:bg-[#d4a38d]"
                 >
-                  녹음 종료 및 전사
+                  립메모 종료 및 전사
                 </button>
               </div>
             </div>
 
             <div className="rounded-lg border border-[#d7dbe2] bg-white shadow-sm">
               <div className="border-b border-[#e1e5eb] p-4">
-                <h2 className="text-base font-semibold">기록 목록</h2>
+                <h2 className="text-base font-semibold">립메모 목록</h2>
               </div>
               <div className="max-h-[520px] overflow-auto">
                 {recordings.length === 0 ? (
                   <p className="p-4 text-sm text-[#6c7480]">
-                    저장된 녹음이 없습니다.
+                    저장된 립메모가 없습니다.
                   </p>
                 ) : (
                   recordings.map((recording) => (
@@ -452,7 +452,7 @@ export default function HomePage() {
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0 flex-1">
                       <label className="block text-sm font-medium text-[#363c46]">
-                        녹음 제목
+                        립메모 제목
                         <input
                           value={draftTitle}
                           onChange={(event) =>
@@ -504,7 +504,7 @@ export default function HomePage() {
                           전사 결과 미리보기
                         </p>
                         <p className="mt-1 text-xs text-[#6c7480]">
-                          녹음 종료 후 자동으로 생성된 스크립트를 바로 확인할 수
+                          립메모 저장 후 자동으로 생성된 스크립트를 바로 확인할 수
                           있습니다.
                         </p>
                       </div>
@@ -582,10 +582,10 @@ export default function HomePage() {
               <div className="flex min-h-[640px] items-center justify-center p-8 text-center">
                 <div>
                   <h2 className="text-lg font-semibold">
-                    선택된 녹음이 없습니다.
+                    선택된 립메모가 없습니다.
                   </h2>
                   <p className="mt-2 text-sm text-[#6c7480]">
-                    새 녹음을 만들면 전사 결과가 이 영역에 표시됩니다.
+                    새 립메모를 만들면 전사 결과가 이 영역에 표시됩니다.
                   </p>
                 </div>
               </div>

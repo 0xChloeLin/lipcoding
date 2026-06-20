@@ -4,8 +4,8 @@ import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
 export const metadata: Metadata = {
-  title: "음성녹음 전사 앱",
-  description: "Groq 기반 음성 전사 및 파일 다운로드 앱",
+  title: "립메모",
+  description: "Groq 기반 립메모 전사 및 파일 다운로드",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
